@@ -1,0 +1,21 @@
+{
+  "name": "Simply Invest Admin",
+  "short_name": "Simply Admin",
+  "description": "Admin dashboard for Simply Invest platform",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1976D2",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "32x32",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/favicon-16x16.svg",
+      "sizes": "16x16",
+      "type": "image/svg+xml"
+    }
+  ]
+} 

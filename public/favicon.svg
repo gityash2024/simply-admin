@@ -1,0 +1,17 @@
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="16" cy="16" r="15" fill="#1976D2" />
+  <circle cx="16" cy="16" r="12" fill="#2196F3" />
+  
+  <!-- "S" for Simply -->
+  <path d="M14.5 9C12.5 9 11 10 11 11.5C11 13 12 13.5 14 14L16 14.5C18 15 19 16 19 17.5C19 19 17.5 20 15.5 20C13.5 20 12 19 11.5 17.5" stroke="white" stroke-width="2" stroke-linecap="round" />
+  
+  <!-- Upward arrow for Investments/Growth -->
+  <path d="M21 15L21 10L26 10" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M21 10L26 15" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+  
+  <!-- Coin/investment symbols at bottom -->
+  <circle cx="16" cy="23" r="2" stroke="white" stroke-width="1.5" />
+  <circle cx="21" cy="23" r="2" stroke="white" stroke-width="1.5" />
+  <circle cx="11" cy="23" r="2" stroke="white" stroke-width="1.5" />
+</svg> 
