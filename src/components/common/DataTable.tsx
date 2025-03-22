@@ -28,6 +28,8 @@ import {
   Visibility as VisibilityIcon,
   MoreVert as MoreVertIcon,
 } from '@mui/icons-material';
+import { useMediaQuery } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 
 type Order = 'asc' | 'desc';
 
@@ -96,6 +98,7 @@ const DataTable = <T extends object>({
   const [order, setOrder] = useState<'asc' | 'desc'>(defaultSortDirection);
   const [actionMenuAnchor, setActionMenuAnchor] = useState<null | HTMLElement>(null);
   const [activeRow, setActiveRow] = useState<T | null>(null);
+  const theme = useTheme();
 
   const handleRequestSort = (property: string) => {
     const isAsc = orderBy === property && order === 'asc';
@@ -187,18 +190,24 @@ const DataTable = <T extends object>({
   return (
     <Paper elevation={2} sx={{ width: '100%', overflow: 'hidden' }}>
       <TableContainer 
-        {...containerProps} 
         sx={{ 
-          ...containerProps?.sx,
-          maxHeight: containerProps?.sx ? (containerProps.sx as any).maxHeight : 'auto' 
+          width: '100%', 
+          maxWidth: '100%',
+          overflowX: 'auto',
+          borderRadius: 1,
+          ...containerProps?.sx
         }}
+        className="full-width-container"
       >
         {loading && <LinearProgress />}
         <Table 
           stickyHeader 
           aria-label="data table"
           size={dense ? 'small' : 'medium'}
-          sx={{ minWidth: 650 }}
+          sx={{ 
+            minWidth: { xs: 500, sm: 650 },
+            tableLayout: 'auto'
+          }}
         >
           <TableHead>
             <TableRow>
@@ -217,7 +226,12 @@ const DataTable = <T extends object>({
                 <TableCell
                   key={column.id}
                   align={column.align || 'left'}
-                  style={{ minWidth: column.minWidth, maxWidth: column.maxWidth }}
+                  style={{ 
+                    minWidth: column.minWidth,
+                    maxWidth: column.maxWidth,
+                    fontWeight: 'bold',
+                    whiteSpace: 'nowrap'
+                  }}
                 >
                   {column.sortable !== false ? (
                     <TableSortLabel
@@ -234,7 +248,7 @@ const DataTable = <T extends object>({
               ))}
 
               {tableActions.length > 0 && (
-                <TableCell align="right" sx={{ width: 60 }}>
+                <TableCell align="right" sx={{ width: { xs: 40, sm: 60 }, pl: { xs: 1, sm: 2 } }}>
                   Actions
                 </TableCell>
               )}
@@ -242,23 +256,26 @@ const DataTable = <T extends object>({
           </TableHead>
           
           <TableBody>
-            {data?.length === 0 ? (
+            {loading ? (
               <TableRow>
-                <TableCell
-                  colSpan={
-                    columns.length + (selectable ? 1 : 0) + (tableActions.length > 0 ? 1 : 0)
-                  }
-                  align="center"
-                >
-                  <Box sx={{ py: 3 }}>
-                    <Typography variant="body1" color="text.secondary">
-                      {emptyStateMessage}
+                <TableCell colSpan={columns.length + (selectable ? 1 : 0) + (tableActions.length > 0 ? 1 : 0)} align="center">
+                  <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
+                    <CircularProgress size={40} />
+                  </Box>
+                </TableCell>
+              </TableRow>
+            ) : data.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={columns.length + (selectable ? 1 : 0) + (tableActions.length > 0 ? 1 : 0)} align="center">
+                  <Box sx={{ py: 5 }}>
+                    <Typography variant="subtitle1" color="text.secondary">
+                      {emptyStateMessage || "No data found"}
                     </Typography>
                   </Box>
                 </TableCell>
               </TableRow>
             ) : (
-              data?.map((row, index) => {
+              data.map((row, index) => {
                 const isItemSelected = isSelected(row[idField]);
                 const labelId = `data-table-checkbox-${index}`;
 
@@ -324,6 +341,9 @@ const DataTable = <T extends object>({
           onRowsPerPageChange={(event) => {
             pagination.onRowsPerPageChange(parseInt(event.target.value, 10));
           }}
+          labelRowsPerPage={
+            useMediaQuery(theme.breakpoints.down('sm')) ? 'Rows:' : 'Rows per page:'
+          }
         />
       )}
 

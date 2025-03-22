@@ -1,33 +1,34 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
+  Badge,
+  IconButton,
   Popover,
   Box,
   Typography,
   List,
   ListItem,
-  ListItemText,
   ListItemAvatar,
+  ListItemText,
   Avatar,
-  Badge,
-  IconButton,
   Divider,
-  Paper,
   Button,
-  Tooltip
+  Tooltip,
+  useTheme,
+  useMediaQuery
 } from '@mui/material';
 import {
   Notifications as NotificationsIcon,
   CheckCircle,
   Info,
   Warning,
-  Error,
-  Circle as CircleIcon
+  Error as ErrorIcon,
+  MarkEmailRead as MarkReadIcon
 } from '@mui/icons-material';
-import { green, blue, orange, red, grey } from '@mui/material/colors';
+import { green, blue, orange, red } from '@mui/material/colors';
 
 export interface Notification {
   id: string;
-  type: 'success' | 'info' | 'warning' | 'error' | 'default';
+  type: 'success' | 'info' | 'warning' | 'error';
   title: string;
   message: string;
   time: string;
@@ -36,49 +37,20 @@ export interface Notification {
 
 interface NotificationPopoverProps {
   notifications: Notification[];
-  onMarkAllAsRead?: () => void;
-  onViewAll?: () => void;
+  onMarkAllAsRead: () => void;
+  onViewAll: () => void;
 }
 
-const getIconForType = (type: Notification['type']) => {
-  switch (type) {
-    case 'success':
-      return <CheckCircle sx={{ color: green[500] }} />;
-    case 'info':
-      return <Info sx={{ color: blue[500] }} />;
-    case 'warning':
-      return <Warning sx={{ color: orange[500] }} />;
-    case 'error':
-      return <Error sx={{ color: red[500] }} />;
-    default:
-      return <CircleIcon sx={{ color: grey[500] }} />;
-  }
-};
-
-const getBackgroundColorForType = (type: Notification['type']) => {
-  switch (type) {
-    case 'success':
-      return green[50];
-    case 'info':
-      return blue[50];
-    case 'warning':
-      return orange[50];
-    case 'error':
-      return red[50];
-    default:
-      return 'transparent';
-  }
-};
-
-const NotificationPopover: React.FC<NotificationPopoverProps> = ({
-  notifications,
-  onMarkAllAsRead,
-  onViewAll
-}) => {
+const NotificationPopover = ({ 
+  notifications, 
+  onMarkAllAsRead, 
+  onViewAll 
+}: NotificationPopoverProps) => {
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
-  
-  const unreadCount = notifications.filter(notification => !notification.read).length;
-  
+  const open = Boolean(anchorEl);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
   };
@@ -87,17 +59,33 @@ const NotificationPopover: React.FC<NotificationPopoverProps> = ({
     setAnchorEl(null);
   };
 
-  const open = Boolean(anchorEl);
-  const id = open ? 'notifications-popover' : undefined;
+  const getNotificationIcon = (type: Notification['type']) => {
+    switch (type) {
+      case 'success':
+        return <CheckCircle sx={{ color: green[500] }} />;
+      case 'info':
+        return <Info sx={{ color: blue[500] }} />;
+      case 'warning':
+        return <Warning sx={{ color: orange[500] }} />;
+      case 'error':
+        return <ErrorIcon sx={{ color: red[500] }} />;
+      default:
+        return <Info sx={{ color: blue[500] }} />;
+    }
+  };
+
+  const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
     <>
       <Tooltip title="Notifications">
-        <IconButton
-          color="inherit"
-          aria-describedby={id}
+        <IconButton 
+          color="inherit" 
           onClick={handleClick}
-          size="large"
+          aria-label={`${unreadCount} notifications`}
+          aria-controls={open ? 'notifications-popover' : undefined}
+          aria-haspopup="true"
+          aria-expanded={open ? 'true' : undefined}
         >
           <Badge badgeContent={unreadCount} color="error">
             <NotificationsIcon />
@@ -106,7 +94,7 @@ const NotificationPopover: React.FC<NotificationPopoverProps> = ({
       </Tooltip>
       
       <Popover
-        id={id}
+        id="notifications-popover"
         open={open}
         anchorEl={anchorEl}
         onClose={handleClose}
@@ -118,26 +106,25 @@ const NotificationPopover: React.FC<NotificationPopoverProps> = ({
           vertical: 'top',
           horizontal: 'right',
         }}
-        PaperProps={{
-          elevation: 3,
-          sx: {
-            width: 360,
-            maxHeight: 480,
-            overflowY: 'auto'
+        sx={{
+          '& .MuiPopover-paper': {
+            width: isMobile ? '100%' : 380,
+            maxHeight: 500,
+            mt: 1
           }
         }}
       >
         <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Typography variant="h6" component="div">
-            Notifications
-          </Typography>
+          <Typography variant="h6">Notifications</Typography>
           {unreadCount > 0 && (
             <Button 
               size="small" 
-              color="primary" 
+              startIcon={<MarkReadIcon />}
               onClick={() => {
-                if (onMarkAllAsRead) onMarkAllAsRead();
-                // Don't close the popover here to show the updated state
+                onMarkAllAsRead();
+                if (notifications.length === 0) {
+                  handleClose();
+                }
               }}
             >
               Mark all as read
@@ -148,78 +135,88 @@ const NotificationPopover: React.FC<NotificationPopoverProps> = ({
         <Divider />
         
         {notifications.length === 0 ? (
-          <Box sx={{ p: 4, textAlign: 'center' }}>
-            <Typography color="textSecondary">No notifications</Typography>
+          <Box sx={{ p: 3, textAlign: 'center' }}>
+            <Typography color="text.secondary">
+              No notifications
+            </Typography>
           </Box>
         ) : (
           <>
-            <List disablePadding>
-              {notifications.map((notification) => (
-                <ListItem 
-                  key={notification.id}
-                  alignItems="flex-start"
-                  sx={{
-                    py: 1.5,
-                    backgroundColor: notification.read ? 'transparent' : getBackgroundColorForType(notification.type),
-                    '&:hover': {
-                      backgroundColor: notification.read ? 'rgba(0, 0, 0, 0.04)' : getBackgroundColorForType(notification.type),
-                    }
-                  }}
-                >
-                  <ListItemAvatar>
-                    <Avatar sx={{ bgcolor: 'background.paper' }}>
-                      {getIconForType(notification.type)}
-                    </Avatar>
-                  </ListItemAvatar>
-                  <ListItemText
-                    primary={
-                      <Typography variant="subtitle2" component="div">
-                        {notification.title}
-                      </Typography>
-                    }
-                    secondary={
-                      <>
-                        <Typography
-                          variant="body2"
-                          color="text.primary"
-                          component="span"
-                          sx={{ display: 'block', mb: 0.5 }}
-                        >
-                          {notification.message}
-                        </Typography>
-                        <Typography
-                          variant="caption"
-                          color="text.secondary"
-                          component="span"
-                        >
-                          {notification.time}
-                        </Typography>
-                      </>
-                    }
-                  />
-                  {!notification.read && (
-                    <Box
-                      sx={{
-                        width: 8,
-                        height: 8,
-                        borderRadius: '50%',
-                        bgcolor: 'primary.main',
-                        alignSelf: 'center',
-                        mr: 1
-                      }}
+            <List sx={{ pt: 0, pb: 0, maxHeight: 350, overflow: 'auto' }}>
+              {notifications.slice(0, 5).map((notification) => (
+                <Box key={notification.id}>
+                  <ListItem 
+                    alignItems="flex-start"
+                    sx={{ 
+                      bgcolor: notification.read ? 'transparent' : 'action.hover',
+                      py: 1.5,
+                      transition: 'background-color 0.3s',
+                      '&:hover': {
+                        bgcolor: 'action.hover',
+                        cursor: 'pointer'
+                      }
+                    }}
+                  >
+                    <ListItemAvatar>
+                      <Avatar sx={{ bgcolor: 'background.paper' }}>
+                        {getNotificationIcon(notification.type)}
+                      </Avatar>
+                    </ListItemAvatar>
+                    <ListItemText
+                      primary={
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <Typography variant="subtitle2" sx={{ fontWeight: notification.read ? 'normal' : 'bold' }}>
+                            {notification.title}
+                          </Typography>
+                          {!notification.read && (
+                            <Box
+                              sx={{
+                                width: 8,
+                                height: 8,
+                                borderRadius: '50%',
+                                bgcolor: 'primary.main',
+                                ml: 1
+                              }}
+                            />
+                          )}
+                        </Box>
+                      }
+                      secondary={
+                        <>
+                          <Typography
+                            component="span"
+                            variant="body2"
+                            color="text.primary"
+                            sx={{ 
+                              display: 'block',
+                              whiteSpace: 'normal',
+                              wordBreak: 'break-word'
+                            }}
+                          >
+                            {notification.message}
+                          </Typography>
+                          <Typography
+                            component="span"
+                            variant="caption"
+                            color="text.secondary"
+                            sx={{ display: 'block', mt: 0.5 }}
+                          >
+                            {notification.time}
+                          </Typography>
+                        </>
+                      }
                     />
-                  )}
-                </ListItem>
+                  </ListItem>
+                  <Divider component="li" />
+                </Box>
               ))}
             </List>
             
-            <Divider />
-            
-            <Box sx={{ p: 1, textAlign: 'center' }}>
+            <Box sx={{ p: 2, textAlign: 'center', borderTop: `1px solid ${theme.palette.divider}` }}>
               <Button 
-                fullWidth 
+                fullWidth
                 onClick={() => {
-                  if (onViewAll) onViewAll();
+                  onViewAll();
                   handleClose();
                 }}
               >

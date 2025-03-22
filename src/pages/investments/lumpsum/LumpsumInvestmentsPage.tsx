@@ -36,6 +36,7 @@ import ConfirmationModal from '../../../components/common/ConfirmationModal';
 import InvestmentDetailDrawer from '../../../components/investments/InvestmentDetailDrawer';
 import InvestmentFormDrawer from '../../../components/investments/InvestmentFormDrawer';
 import { Column } from '../../../components/common/DataTable';
+import LoadingScreen from '../../../components/common/LoadingScreen';
 
 const mockInvestments: Investment[] = [
   {
@@ -359,6 +360,7 @@ const LumpsumInvestmentsPage = () => {
     <Box sx={{ 
       height: '100%', 
       width: '100%', 
+      maxWidth: '100%',
       display: 'flex', 
       flexDirection: 'column',
       flex: 1,
@@ -382,7 +384,7 @@ const LumpsumInvestmentsPage = () => {
         }
       />
 
-      <Paper elevation={2} sx={{ p: 2, mb: 3 }}>
+      <Paper elevation={2} sx={{ p: 2, mb: 3, width: '100%', maxWidth: '100%' }}>
         <Grid container spacing={2} alignItems="center">
           <Grid item xs={12} md={6}>
             <TextField
@@ -450,10 +452,13 @@ const LumpsumInvestmentsPage = () => {
       <Box sx={{ 
         flexGrow: 1, 
         width: '100%', 
+        maxWidth: '100%',
         height: 'calc(100vh - 300px)', 
         minHeight: '400px',
-        overflow: 'auto'
+        overflow: 'auto',
+        position: 'relative'
       }}>
+        {loading && <LoadingScreen />}
         <DataTable
           columns={columns}
           data={investments}

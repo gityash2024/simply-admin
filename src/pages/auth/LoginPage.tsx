@@ -18,7 +18,9 @@ import {
   FormControlLabel,
   Checkbox,
   Grid,
-  Link
+  Link,
+  useTheme,
+  useMediaQuery
 } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
@@ -36,6 +38,8 @@ const LoginPage = () => {
   const { login, loading, error, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = React.useState(false);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const handleClickShowPassword = () => {
     setShowPassword(!showPassword);
@@ -63,8 +67,8 @@ const LoginPage = () => {
   return (
     <Box
       sx={{
-        height: '100vh',
-        width: '100vw',
+        minHeight: '100vh',
+        width: '100%',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -74,133 +78,128 @@ const LoginPage = () => {
         overflow: 'hidden'
       }}
     >
-      <Container
-        component="main"
-        maxWidth="xs"
+      <Paper
+        elevation={6}
         sx={{
+          p: isMobile ? 3 : 4,
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
+          borderRadius: 2,
+          width: '100%',
+          maxWidth: '360px',
+          position: 'absolute',
+          left: '50%',
+          top: '50%',
+          transform: 'translate(-50%, -50%)'
         }}
       >
-        <Paper
-          elevation={6}
-          sx={{
-            p: 4,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            borderRadius: 2,
-            width: '100%',
-          }}
-        >
-          <Avatar sx={{ m: 1, bgcolor: 'primary.main' }}>
-            <LockOutlinedIcon />
-          </Avatar>
-          <Typography component="h1" variant="h5" sx={{ mb: 3 }}>
-            Sign in to Simply Invest
-          </Typography>
-          
-          <Box component="form" onSubmit={formik.handleSubmit} noValidate sx={{ mt: 1, width: '100%' }}>
-            {error && (
-              <Alert severity="error" sx={{ mb: 2 }}>
-                {error}
-              </Alert>
-            )}
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="email"
-              label="Email Address"
-              name="email"
-              autoComplete="email"
-              autoFocus
-              value={formik.values.email}
-              onChange={formik.handleChange}
-              error={formik.touched.email && Boolean(formik.errors.email)}
-              helperText={formik.touched.email && formik.errors.email}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <EmailIcon />
-                  </InputAdornment>
-                ),
-              }}
-            />
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              name="password"
-              label="Password"
-              type={showPassword ? 'text' : 'password'}
-              id="password"
-              autoComplete="current-password"
-              value={formik.values.password}
-              onChange={formik.handleChange}
-              error={formik.touched.password && Boolean(formik.errors.password)}
-              helperText={formik.touched.password && formik.errors.password}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <LockOutlinedIcon />
-                  </InputAdornment>
-                ),
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton
-                      aria-label="toggle password visibility"
-                      onClick={handleClickShowPassword}
-                      edge="end"
-                    >
-                      {showPassword ? <VisibilityOff /> : <Visibility />}
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-            />
-            <FormControlLabel
-              control={<Checkbox value="remember" color="primary" />}
-              label="Remember me"
-            />
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              sx={{ mt: 3, mb: 2 }}
-              disabled={loading}
-            >
-              {loading ? <CircularProgress size={24} /> : 'Sign In'}
-            </Button>
-            <Grid container>
-              <Grid item xs>
-                <Link href="#" variant="body2">
-                  Forgot password?
-                </Link>
-              </Grid>
-              <Grid item>
-                <Link href="#" variant="body2">
-                  {"Don't have an account? Contact Admin"}
-                </Link>
-              </Grid>
-            </Grid>
-          </Box>
-        </Paper>
-        <Typography
-          variant="body2"
-          color="text.secondary"
-          align="center"
-          sx={{ mt: 4 }}
-        >
-          {'© '}
-          <Link color="inherit" href="#">
-            Simply Invest
-          </Link>{' '}
-          {new Date().getFullYear()}
-          {'.'}
+        <Avatar sx={{ m: 1, bgcolor: 'primary.main', width: isMobile ? 40 : 48, height: isMobile ? 40 : 48 }}>
+          <LockOutlinedIcon fontSize={isMobile ? "medium" : "large"} />
+        </Avatar>
+        <Typography component="h1" variant={isMobile ? "h5" : "h4"} sx={{ mb: 3, textAlign: 'center' }}>
+          Sign in to Simply Invest
         </Typography>
-      </Container>
+        
+        <Box component="form" onSubmit={formik.handleSubmit} noValidate sx={{ mt: 1, width: '100%' }}>
+          {error && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {error}
+            </Alert>
+          )}
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            id="email"
+            label="Email Address"
+            name="email"
+            autoComplete="email"
+            autoFocus
+            size={isMobile ? "small" : "medium"}
+            value={formik.values.email}
+            onChange={formik.handleChange}
+            error={formik.touched.email && Boolean(formik.errors.email)}
+            helperText={formik.touched.email && formik.errors.email}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <EmailIcon fontSize={isMobile ? "small" : "medium"} />
+                </InputAdornment>
+              ),
+            }}
+          />
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            name="password"
+            label="Password"
+            type={showPassword ? 'text' : 'password'}
+            id="password"
+            size={isMobile ? "small" : "medium"}
+            autoComplete="current-password"
+            value={formik.values.password}
+            onChange={formik.handleChange}
+            error={formik.touched.password && Boolean(formik.errors.password)}
+            helperText={formik.touched.password && formik.errors.password}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <LockOutlinedIcon fontSize={isMobile ? "small" : "medium"} />
+                </InputAdornment>
+              ),
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label="toggle password visibility"
+                    onClick={handleClickShowPassword}
+                    edge="end"
+                    size={isMobile ? "small" : "medium"}
+                  >
+                    {showPassword ? <VisibilityOff fontSize={isMobile ? "small" : "medium"} /> : <Visibility fontSize={isMobile ? "small" : "medium"} />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+          />
+          <FormControlLabel
+            control={<Checkbox value="remember" color="primary" size={isMobile ? "small" : "medium"} />}
+            label={<Typography variant={isMobile ? "body2" : "body1"}>Remember me</Typography>}
+          />
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            sx={{ 
+              mt: 3, 
+              mb: 2,
+              py: isMobile ? 1 : 1.5,
+              fontSize: isMobile ? '0.875rem' : '1rem'
+            }}
+            disabled={loading}
+          >
+            {loading ? <CircularProgress size={isMobile ? 20 : 24} /> : 'Sign In'}
+          </Button>
+        </Box>
+      </Paper>
+      <Typography
+        variant={isMobile ? "caption" : "body2"}
+        color="text.secondary"
+        align="center"
+        sx={{ 
+          position: 'absolute',
+          bottom: 16,
+          width: '100%'
+        }}
+      >
+        {'© '}
+        <Link color="inherit" href="#">
+          Simply Invest
+        </Link>{' '}
+        {new Date().getFullYear()}
+        {'.'}
+      </Typography>
     </Box>
   );
 };

@@ -28,90 +28,91 @@ import {
   Refresh as RefreshIcon
 } from '@mui/icons-material';
 import { green, blue, orange, red, grey } from '@mui/material/colors';
+import { format, formatDistanceToNow } from 'date-fns';
 import PageHeader from '../../components/common/PageHeader';
-import { Notification } from '../../components/layout/NotificationPopover';
+import { Notification } from '../../components/common/NotificationPopover';
 
-// Mock notifications data
+// Mock notifications data that matches the Notification interface
 const mockNotifications: Notification[] = [
   {
     id: '1',
     type: 'success',
     title: 'Investment Completed',
     message: 'SIP investment of ₹10,000 for Priya Patel has been successfully processed',
-    time: '10 minutes ago',
-    read: false
+    read: false,
+    createdAt: new Date(Date.now() - 10 * 60 * 1000).toISOString() // 10 minutes ago
   },
   {
     id: '2',
     type: 'info',
     title: 'New Customer Registered',
     message: 'Amit Singh has registered as a new customer',
-    time: '1 hour ago',
-    read: true
+    read: true,
+    createdAt: new Date(Date.now() - 60 * 60 * 1000).toISOString() // 1 hour ago
   },
   {
     id: '3',
     type: 'warning',
     title: 'Payment Due',
     message: 'Upcoming SIP payment for Rahul Sharma is due in 2 days',
-    time: '3 hours ago',
-    read: false
+    read: false,
+    createdAt: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString() // 3 hours ago
   },
   {
     id: '4',
     type: 'error',
     title: 'Transaction Failed',
     message: 'Lumpsum investment processing failed for Neha Gupta due to insufficient funds',
-    time: '5 hours ago',
-    read: true
+    read: true,
+    createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString() // 5 hours ago
   },
   {
     id: '5',
     type: 'success',
     title: 'Return Processed',
     message: 'Investment return of ₹15,000 has been credited to Vikram Mehta',
-    time: '1 day ago',
-    read: true
+    read: true,
+    createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString() // 1 day ago
   },
   {
     id: '6',
     type: 'info',
     title: 'Document Updated',
     message: 'Rahul Sharma has updated their KYC documents',
-    time: '2 days ago',
-    read: true
+    read: true,
+    createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString() // 2 days ago
   },
   {
     id: '7',
     type: 'warning',
     title: 'Portfolio Alert',
     message: 'Market volatility affecting 3 of your customer portfolios',
-    time: '2 days ago',
-    read: false
+    read: false,
+    createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString() // 2 days ago
   },
   {
     id: '8',
     type: 'info',
     title: 'System Update',
     message: 'The platform will undergo maintenance on Sunday, 5 PM IST',
-    time: '3 days ago',
-    read: true
+    read: true,
+    createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString() // 3 days ago
   },
   {
     id: '9',
     type: 'success',
     title: 'Goal Achieved',
     message: 'Customer Amit Singh has reached their investment goal of ₹5,00,000',
-    time: '4 days ago',
-    read: true
+    read: true,
+    createdAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString() // 4 days ago
   },
   {
     id: '10',
     type: 'error',
     title: 'Account Locked',
     message: 'Multiple failed login attempts detected for user account admin@example.com',
-    time: '5 days ago',
-    read: false
+    read: false,
+    createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString() // 5 days ago
   }
 ];
 
@@ -231,7 +232,13 @@ const NotificationsPage = () => {
   });
 
   return (
-    <Box sx={{ height: '100%', width: '100%', display: 'flex', flexDirection: 'column' }}>
+    <Box sx={{ 
+      width: '100%', 
+      display: 'flex', 
+      flexDirection: 'column',
+      flex: 1,
+      overflow: 'hidden'
+    }}>
       <PageHeader
         title="Notifications"
         breadcrumbs={[
@@ -250,104 +257,123 @@ const NotificationsPage = () => {
         }
       />
 
-      <Paper elevation={2} sx={{ mb: 3 }}>
+      <Paper elevation={2} sx={{ p: 2, mb: 2, width: '100%' }}>
+        <Grid container alignItems="center" spacing={2}>
+          <Grid item xs={12} sm={6} md={4}>
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              <Button
+                variant="outlined"
+                color="primary"
+                size="small"
+                startIcon={<MarkReadIcon />}
+                disabled={selectedNotifications.length === 0}
+                onClick={() => handleMarkAsRead()}
+              >
+                Mark as Read
+              </Button>
+              <Button
+                variant="outlined"
+                color="error"
+                size="small"
+                startIcon={<DeleteIcon />}
+                disabled={selectedNotifications.length === 0}
+                onClick={() => handleDeleteNotifications()}
+              >
+                Delete
+              </Button>
+            </Box>
+          </Grid>
+          <Grid item xs={12} sm={6} md={8}>
+            <Box sx={{ display: 'flex', justifyContent: { xs: 'flex-start', sm: 'flex-end' } }}>
+              <Button
+                variant="text"
+                color="primary"
+                size="small"
+                onClick={handleSelectAll}
+              >
+                {filteredNotifications.length === selectedNotifications.length
+                  ? 'Deselect All'
+                  : 'Select All'}
+              </Button>
+            </Box>
+          </Grid>
+        </Grid>
+      </Paper>
+      
+      <Paper 
+        elevation={2} 
+        sx={{ 
+          width: '100%', 
+          flexGrow: 1, 
+          display: 'flex', 
+          flexDirection: 'column',
+          overflow: 'hidden'
+        }}
+      >
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-          <Tabs 
-            value={tabValue} 
+          <Tabs
+            value={tabValue}
             onChange={handleTabChange}
             aria-label="notification tabs"
             sx={{ px: 2 }}
           >
-            <Tab label={`All (${notifications.length})`} id="notification-tab-0" aria-controls="notification-tabpanel-0" />
+            <Tab label={`All (${notifications.length})`} id="notification-tab-0" />
             <Tab 
               label={`Unread (${notifications.filter(n => !n.read).length})`} 
               id="notification-tab-1" 
-              aria-controls="notification-tabpanel-1" 
             />
             <Tab 
               label={`Read (${notifications.filter(n => n.read).length})`} 
               id="notification-tab-2" 
-              aria-controls="notification-tabpanel-2" 
             />
           </Tabs>
         </Box>
 
-        <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between' }}>
-          <Box>
-            <Button 
-              size="small" 
-              onClick={handleSelectAll}
-              sx={{ mr: 1 }}
-            >
-              {filteredNotifications.length === selectedNotifications.length ? 'Deselect All' : 'Select All'}
-            </Button>
-            <Typography variant="body2" color="text.secondary" component="span">
-              {selectedNotifications.length} selected
-            </Typography>
-          </Box>
-          <Box>
-            {selectedNotifications.length > 0 && (
-              <>
-                <Button 
-                  size="small" 
-                  color="primary"
-                  startIcon={<MarkReadIcon />}
-                  onClick={() => handleMarkAsRead()}
-                  sx={{ mr: 1 }}
-                  disabled={selectedNotifications.every(id => 
-                    notifications.find(n => n.id === id)?.read
-                  )}
-                >
-                  Mark as Read
-                </Button>
-                <Button 
-                  size="small" 
-                  color="error"
-                  startIcon={<DeleteIcon />}
-                  onClick={() => handleDeleteNotifications()}
-                >
-                  Delete
-                </Button>
-              </>
-            )}
-          </Box>
-        </Box>
-
-        <Divider />
-
         <TabPanel value={tabValue} index={0}>
-          <NotificationList 
-            notifications={filteredNotifications} 
-            selectedNotifications={selectedNotifications}
-            onSelect={handleSelectNotification}
-            onMarkAsRead={handleMarkAsRead}
-            onDelete={handleDeleteNotifications}
-          />
+          <Box sx={{ 
+            height: 'calc(100vh - 350px)', 
+            minHeight: '400px',
+            overflow: 'auto' 
+          }}>
+            <NotificationList
+              notifications={filteredNotifications}
+              selectedNotifications={selectedNotifications}
+              onSelect={handleSelectNotification}
+              onMarkAsRead={handleMarkAsRead}
+              onDelete={handleDeleteNotifications}
+            />
+          </Box>
         </TabPanel>
         <TabPanel value={tabValue} index={1}>
-          <NotificationList 
-            notifications={filteredNotifications} 
-            selectedNotifications={selectedNotifications}
-            onSelect={handleSelectNotification}
-            onMarkAsRead={handleMarkAsRead}
-            onDelete={handleDeleteNotifications}
-          />
+          <Box sx={{ 
+            height: 'calc(100vh - 350px)', 
+            minHeight: '400px',
+            overflow: 'auto' 
+          }}>
+            <NotificationList
+              notifications={filteredNotifications}
+              selectedNotifications={selectedNotifications}
+              onSelect={handleSelectNotification}
+              onMarkAsRead={handleMarkAsRead}
+              onDelete={handleDeleteNotifications}
+            />
+          </Box>
         </TabPanel>
         <TabPanel value={tabValue} index={2}>
-          <NotificationList 
-            notifications={filteredNotifications} 
-            selectedNotifications={selectedNotifications}
-            onSelect={handleSelectNotification}
-            onMarkAsRead={handleMarkAsRead}
-            onDelete={handleDeleteNotifications}
-          />
-        </TabPanel>
-
-        {filteredNotifications.length === 0 && (
-          <Box sx={{ py: 4, textAlign: 'center' }}>
-            <Typography color="text.secondary">No notifications found</Typography>
+          <Box sx={{ 
+            height: 'calc(100vh - 350px)', 
+            minHeight: '400px',
+            overflow: 'auto' 
+          }}>
+            <NotificationList
+              notifications={filteredNotifications}
+              selectedNotifications={selectedNotifications}
+              onSelect={handleSelectNotification}
+              onMarkAsRead={handleMarkAsRead}
+              onDelete={handleDeleteNotifications}
+            />
           </Box>
-        )}
+        </TabPanel>
       </Paper>
     </Box>
   );
@@ -452,8 +478,13 @@ const NotificationList = ({
                     </Typography>
                   </Grid>
                   <Grid item xs={12}>
-                    <Typography variant="caption" color="text.secondary">
-                      {notification.time}
+                    <Typography
+                      component="span"
+                      variant="caption"
+                      color="text.secondary"
+                      sx={{ display: 'block', mt: 0.5 }}
+                    >
+                      {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
                     </Typography>
                   </Grid>
                 </Grid>

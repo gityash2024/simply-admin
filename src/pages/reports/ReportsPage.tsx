@@ -13,7 +13,8 @@ import {
   Select,
   MenuItem,
   TextField,
-  Button
+  Button,
+  SelectChangeEvent
 } from '@mui/material';
 import {
   Assessment as AssessmentIcon,
@@ -23,6 +24,8 @@ import {
   DateRange as DateRangeIcon
 } from '@mui/icons-material';
 import PageHeader from '../../components/common/PageHeader';
+import { useTheme } from '@mui/material/styles';
+import { useMediaQuery } from '@mui/material';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -39,10 +42,11 @@ function TabPanel(props: TabPanelProps) {
       hidden={value !== index}
       id={`reports-tabpanel-${index}`}
       aria-labelledby={`reports-tab-${index}`}
+      style={{ width: '100%', maxWidth: '100%' }}
       {...other}
     >
       {value === index && (
-        <Box sx={{ p: 3 }}>
+        <Box sx={{ p: { xs: 1, sm: 2, md: 3 }, width: '100%' }}>
           {children}
         </Box>
       )}
@@ -53,17 +57,26 @@ function TabPanel(props: TabPanelProps) {
 const ReportsPage = () => {
   const [tabValue, setTabValue] = useState(0);
   const [reportPeriod, setReportPeriod] = useState('month');
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
   };
 
-  const handlePeriodChange = (event: React.ChangeEvent<{ value: unknown }>) => {
-    setReportPeriod(event.target.value as string);
+  const handlePeriodChange = (event: SelectChangeEvent) => {
+    setReportPeriod(event.target.value);
   };
 
   return (
-    <Box>
+    <Box sx={{ 
+      width: '100%', 
+      maxWidth: '100%',
+      flex: 1,
+      display: 'flex',
+      flexDirection: 'column',
+      overflow: 'hidden'
+    }}>
       <PageHeader
         title="Reports & Analytics"
         breadcrumbs={[
@@ -72,39 +85,55 @@ const ReportsPage = () => {
         ]}
       />
 
-      <Paper elevation={2}>
-        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+      <Paper elevation={2} sx={{ mb: 3, width: '100%', maxWidth: '100%' }}>
+        <Box sx={{ borderBottom: 1, borderColor: 'divider', width: '100%' }}>
           <Tabs 
             value={tabValue} 
-            onChange={handleTabChange} 
-            aria-label="reports tabs"
+            onChange={handleTabChange}
+            aria-label="report tabs"
+            sx={{ px: 2 }}
             variant="scrollable"
             scrollButtons="auto"
           >
-            <Tab label="Investment Summary" icon={<AssessmentIcon />} iconPosition="start" />
-            <Tab label="Growth Analysis" icon={<TrendingUpIcon />} iconPosition="start" />
-            <Tab label="Customer Distribution" icon={<PieChartIcon />} iconPosition="start" />
-            <Tab label="Detailed Reports" icon={<TableChartIcon />} iconPosition="start" />
+            <Tab 
+              label="Investment Summary" 
+              icon={<AssessmentIcon />} 
+              iconPosition="start"
+            />
+            <Tab 
+              label="Growth Analysis" 
+              icon={<TrendingUpIcon />}
+              iconPosition="start"
+            />
+            <Tab 
+              label="Customer Distribution" 
+              icon={<PieChartIcon />}
+              iconPosition="start"
+            />
+            <Tab 
+              label="Detailed Reports" 
+              icon={<TableChartIcon />}
+              iconPosition="start"
+            />
           </Tabs>
         </Box>
 
-        {/* Filter Controls */}
-        <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider', bgcolor: '#f9f9f9' }}>
+        <Box sx={{ p: 2 }}>
           <Grid container spacing={2} alignItems="center">
             <Grid item xs={12} md={3}>
               <FormControl fullWidth size="small">
-                <InputLabel id="report-period-label">Time Period</InputLabel>
+                <InputLabel id="time-period-label">Time Period</InputLabel>
                 <Select
-                  labelId="report-period-label"
+                  labelId="time-period-label"
                   value={reportPeriod}
                   label="Time Period"
-                  onChange={handlePeriodChange as any}
+                  onChange={handlePeriodChange}
                 >
-                  <MenuItem value="day">Daily</MenuItem>
-                  <MenuItem value="week">Weekly</MenuItem>
-                  <MenuItem value="month">Monthly</MenuItem>
-                  <MenuItem value="quarter">Quarterly</MenuItem>
-                  <MenuItem value="year">Yearly</MenuItem>
+                  <MenuItem value="daily">Daily</MenuItem>
+                  <MenuItem value="weekly">Weekly</MenuItem>
+                  <MenuItem value="monthly">Monthly</MenuItem>
+                  <MenuItem value="quarterly">Quarterly</MenuItem>
+                  <MenuItem value="yearly">Yearly</MenuItem>
                 </Select>
               </FormControl>
             </Grid>
@@ -133,7 +162,16 @@ const ReportsPage = () => {
             </Grid>
           </Grid>
         </Box>
+      </Paper>
 
+      <Box sx={{ 
+        flexGrow: 1, 
+        width: '100%', 
+        maxWidth: '100%',
+        overflow: 'auto',
+        height: 'calc(100vh - 300px)',
+        minHeight: '500px'
+      }}>
         <TabPanel value={tabValue} index={0}>
           <Box sx={{ mb: 4 }}>
             <Typography variant="h6" gutterBottom>
@@ -457,7 +495,7 @@ const ReportsPage = () => {
             </Grid>
           </Grid>
         </TabPanel>
-      </Paper>
+      </Box>
     </Box>
   );
 };

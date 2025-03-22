@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { ThemeProvider, CssBaseline } from '@mui/material';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import './App.css';
 import theme from './theme';
 import { AuthProvider } from './contexts/AuthContext';
 import Layout from './components/layout/Layout';
@@ -17,13 +18,14 @@ import ReportsPage from './pages/reports/ReportsPage';
 import SettingsPage from './pages/settings/SettingsPage';
 import NotificationsPage from './pages/notifications/NotificationsPage';
 import { useAuth } from './contexts/AuthContext';
+import LoadingScreen from './components/common/LoadingScreen';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }: { children: React.ReactElement }) => {
   const { isAuthenticated, loading } = useAuth();
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <LoadingScreen message="Authenticating..." />;
   }
 
   if (!isAuthenticated) {

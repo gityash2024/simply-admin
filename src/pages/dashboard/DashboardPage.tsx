@@ -11,14 +11,19 @@ import {
   ListItem,
   ListItemText,
   ListItemAvatar,
-  Avatar
+  Avatar,
+  useTheme,
+  useMediaQuery,
+  Button
 } from '@mui/material';
 import {
   PeopleAlt as PeopleIcon,
   AttachMoney as MoneyIcon,
   TrendingUp as TrendingUpIcon,
   AccountBalance as AccountIcon,
-  Person as PersonIcon
+  Person as PersonIcon,
+  CalendarMonth as CalendarMonthIcon,
+  Add as AddIcon
 } from '@mui/icons-material';
 import { Bar, Doughnut } from 'react-chartjs-2';
 import {
@@ -36,6 +41,7 @@ import PageHeader from '../../components/common/PageHeader';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { customerService } from '../../services/customerService';
 import { investmentService } from '../../services/investmentService';
+import ScheduleModal from '../../components/common/ScheduleModal';
 
 // Register ChartJS components
 ChartJS.register(
@@ -62,37 +68,53 @@ const DashboardPage = () => {
     activeInvestments: 0
   });
   const [recentCustomers, setRecentCustomers] = useState<any[]>([]);
+  const [scheduleModalOpen, setScheduleModalOpen] = useState(false);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const isTablet = useMediaQuery(theme.breakpoints.down('md'));
 
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
         setLoading(true);
         
-        // In a real app, these would be proper API calls
-        // For now, we'll use our mock data
-        const customerStatsResponse = await customerService.getCustomerStats();
-        const investmentStatsResponse = await investmentService.getInvestmentStats();
+        // Mock data instead of API calls
+        const mockCustomerStats = {
+          success: true,
+          data: {
+            total: 843,
+            active: 735,
+            newThisMonth: 68
+          }
+        };
         
-        // Get recent customers (mock data for now)
-        const customersResponse = await customerService.getCustomers({ 
-          page: 0, 
-          perPage: 5, 
-          total: 0 
-        });
+        const mockInvestmentStats = {
+          success: true,
+          data: {
+            totalInvestments: 1245,
+            totalSipAmount: 6324890,
+            totalLumpsumAmount: 6223860,
+            activeInvestments: 980
+          }
+        };
         
-        if (customerStatsResponse.success) {
-          setCustomerStats(customerStatsResponse.data);
-        }
+        const mockRecentCustomers = {
+          success: true,
+          data: [
+            { _id: '1', name: 'Rahul Sharma', email: 'rahul@example.com', phone: '9876543210', joinedDate: '2023-05-15' },
+            { _id: '2', name: 'Priya Patel', email: 'priya@example.com', phone: '9876543211', joinedDate: '2023-05-18' },
+            { _id: '3', name: 'Amit Singh', email: 'amit@example.com', phone: '9876543212', joinedDate: '2023-05-20' },
+            { _id: '4', name: 'Neha Gupta', email: 'neha@example.com', phone: '9876543213', joinedDate: '2023-05-22' },
+            { _id: '5', name: 'Vikram Mehta', email: 'vikram@example.com', phone: '9876543214', joinedDate: '2023-05-25' }
+          ]
+        };
         
-        if (investmentStatsResponse.success) {
-          setInvestmentStats(investmentStatsResponse.data);
-        }
-        
-        if (customersResponse.success) {
-          setRecentCustomers(customersResponse.data || []);
-        }
+        // Update state with mock data
+        setCustomerStats(mockCustomerStats.data);
+        setInvestmentStats(mockInvestmentStats.data);
+        setRecentCustomers(mockRecentCustomers.data);
       } catch (error) {
-        console.error('Error fetching dashboard data:', error);
+        console.error('Error setting up dashboard data:', error);
       } finally {
         setLoading(false);
       }
@@ -126,74 +148,175 @@ const DashboardPage = () => {
     ],
   };
 
+  // For mock data purposes, we'll define chart options based on screen size
+  const getChartOptions = () => {
+    return {
+      maintainAspectRatio: false,
+      responsive: true,
+      plugins: {
+        legend: {
+          display: !isMobile,
+          position: 'top' as const,
+          labels: {
+            boxWidth: isMobile ? 10 : 20,
+            font: {
+              size: isMobile ? 10 : 12
+            }
+          }
+        },
+        tooltip: {
+          bodyFont: {
+            size: isMobile ? 10 : 12
+          },
+          titleFont: {
+            size: isMobile ? 10 : 12
+          }
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            font: {
+              size: isMobile ? 8 : 11
+            }
+          }
+        },
+        x: {
+          grid: {
+            display: false
+          },
+          ticks: {
+            font: {
+              size: isMobile ? 8 : 11
+            }
+          }
+        }
+      }
+    };
+  };
+
+  const handleOpenScheduleModal = () => {
+    setScheduleModalOpen(true);
+  };
+
+  const handleCloseScheduleModal = () => {
+    setScheduleModalOpen(false);
+  };
+
+  const handleScheduleSubmit = (scheduleData: any) => {
+    console.log('Schedule submitted:', scheduleData);
+    // Here you would typically save the schedule data to your backend
+    handleCloseScheduleModal();
+  };
+
   if (loading) {
     return <LoadingSpinner message="Loading dashboard data..." />;
   }
 
   return (
-    <Box>
-      <PageHeader title="Dashboard" />
+    <Box sx={{ 
+      flexGrow: 1,
+      height: '100%',
+      overflow: 'auto'
+    }}>
+      <PageHeader 
+        title="Dashboard" 
+        action={
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<CalendarMonthIcon />}
+            onClick={handleOpenScheduleModal}
+          >
+            Schedule
+          </Button>
+        }
+      />
       
-      <Grid container spacing={3}>
+      {/* Schedule Modal */}
+      <ScheduleModal
+        open={scheduleModalOpen}
+        onClose={handleCloseScheduleModal}
+        onSubmit={handleScheduleSubmit}
+      />
+      
+      <Grid container spacing={isMobile ? 2 : 3}>
         {/* Summary Cards */}
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid item xs={6} sm={6} md={3}>
           <Card elevation={3}>
-            <CardContent>
+            <CardContent sx={{ p: isMobile ? 1.5 : 2 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Box>
-                  <Typography variant="subtitle2" color="text.secondary">Total Customers</Typography>
-                  <Typography variant="h4" sx={{ mt: 1 }}>{customerStats.total}</Typography>
+                <Box sx={{ mr: 1 }}>
+                  <Typography variant="subtitle2" color="text.secondary" sx={{ fontSize: isMobile ? '0.7rem' : 'inherit' }}>
+                    Total Customers
+                  </Typography>
+                  <Typography variant={isMobile ? "h6" : "h4"} sx={{ mt: 1 }}>
+                    {customerStats.total}
+                  </Typography>
                 </Box>
-                <Avatar sx={{ bgcolor: 'primary.main' }}>
-                  <PeopleIcon />
+                <Avatar sx={{ bgcolor: 'primary.main', width: isMobile ? 32 : 40, height: isMobile ? 32 : 40 }}>
+                  <PeopleIcon fontSize={isMobile ? "small" : "medium"} />
                 </Avatar>
               </Box>
             </CardContent>
           </Card>
         </Grid>
         
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid item xs={6} sm={6} md={3}>
           <Card elevation={3}>
-            <CardContent>
+            <CardContent sx={{ p: isMobile ? 1.5 : 2 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Box>
-                  <Typography variant="subtitle2" color="text.secondary">Total Investments</Typography>
-                  <Typography variant="h4" sx={{ mt: 1 }}>{investmentStats.totalInvestments}</Typography>
+                <Box sx={{ mr: 1 }}>
+                  <Typography variant="subtitle2" color="text.secondary" sx={{ fontSize: isMobile ? '0.7rem' : 'inherit' }}>
+                    Total Investments
+                  </Typography>
+                  <Typography variant={isMobile ? "h6" : "h4"} sx={{ mt: 1 }}>
+                    {investmentStats.totalInvestments}
+                  </Typography>
                 </Box>
-                <Avatar sx={{ bgcolor: 'success.main' }}>
-                  <MoneyIcon />
+                <Avatar sx={{ bgcolor: 'success.main', width: isMobile ? 32 : 40, height: isMobile ? 32 : 40 }}>
+                  <MoneyIcon fontSize={isMobile ? "small" : "medium"} />
                 </Avatar>
               </Box>
             </CardContent>
           </Card>
         </Grid>
         
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid item xs={6} sm={6} md={3}>
           <Card elevation={3}>
-            <CardContent>
+            <CardContent sx={{ p: isMobile ? 1.5 : 2 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Box>
-                  <Typography variant="subtitle2" color="text.secondary">Active Investments</Typography>
-                  <Typography variant="h4" sx={{ mt: 1 }}>{investmentStats.activeInvestments}</Typography>
+                <Box sx={{ mr: 1 }}>
+                  <Typography variant="subtitle2" color="text.secondary" sx={{ fontSize: isMobile ? '0.7rem' : 'inherit' }}>
+                    Active Investments
+                  </Typography>
+                  <Typography variant={isMobile ? "h6" : "h4"} sx={{ mt: 1 }}>
+                    {investmentStats.activeInvestments}
+                  </Typography>
                 </Box>
-                <Avatar sx={{ bgcolor: 'info.main' }}>
-                  <TrendingUpIcon />
+                <Avatar sx={{ bgcolor: 'info.main', width: isMobile ? 32 : 40, height: isMobile ? 32 : 40 }}>
+                  <TrendingUpIcon fontSize={isMobile ? "small" : "medium"} />
                 </Avatar>
               </Box>
             </CardContent>
           </Card>
         </Grid>
         
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid item xs={6} sm={6} md={3}>
           <Card elevation={3}>
-            <CardContent>
+            <CardContent sx={{ p: isMobile ? 1.5 : 2 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Box>
-                  <Typography variant="subtitle2" color="text.secondary">New Customers (This Month)</Typography>
-                  <Typography variant="h4" sx={{ mt: 1 }}>{customerStats.newThisMonth}</Typography>
+                <Box sx={{ mr: 1 }}>
+                  <Typography variant="subtitle2" color="text.secondary" sx={{ fontSize: isMobile ? '0.7rem' : 'inherit' }}>
+                    New Customers
+                  </Typography>
+                  <Typography variant={isMobile ? "h6" : "h4"} sx={{ mt: 1 }}>
+                    {customerStats.newThisMonth}
+                  </Typography>
                 </Box>
-                <Avatar sx={{ bgcolor: 'warning.main' }}>
-                  <AccountIcon />
+                <Avatar sx={{ bgcolor: 'warning.main', width: isMobile ? 32 : 40, height: isMobile ? 32 : 40 }}>
+                  <AccountIcon fontSize={isMobile ? "small" : "medium"} />
                 </Avatar>
               </Box>
             </CardContent>
@@ -202,52 +325,46 @@ const DashboardPage = () => {
         
         {/* Charts */}
         <Grid item xs={12} md={8}>
-          <Paper elevation={3} sx={{ p: 2 }}>
-            <Typography variant="h6" gutterBottom>Monthly Investment Summary</Typography>
+          <Paper elevation={3} sx={{ p: isMobile ? 1.5 : 2 }}>
+            <Typography variant={isMobile ? "subtitle1" : "h6"} gutterBottom>
+              Monthly Investment Summary
+            </Typography>
             <Divider sx={{ mb: 2 }} />
-            <Box sx={{ height: 300 }}>
+            <Box sx={{ height: isMobile ? 250 : 300 }}>
               <Bar
                 data={monthlySummaryData}
-                options={{
-                  maintainAspectRatio: false,
-                  responsive: true,
-                  plugins: {
-                    legend: {
-                      display: false
-                    }
-                  },
-                  scales: {
-                    y: {
-                      beginAtZero: true,
-                      grid: {
-                      }
-                    },
-                    x: {
-                      grid: {
-                        display: false
-                      }
-                    }
-                  }
-                }}
+                options={getChartOptions()}
               />
             </Box>
           </Paper>
         </Grid>
         
         <Grid item xs={12} md={4}>
-          <Paper elevation={3} sx={{ p: 2 }}>
-            <Typography variant="h6" gutterBottom>Investment Distribution</Typography>
+          <Paper elevation={3} sx={{ p: isMobile ? 1.5 : 2 }}>
+            <Typography variant={isMobile ? "subtitle1" : "h6"} gutterBottom>
+              Investment Distribution
+            </Typography>
             <Divider sx={{ mb: 2 }} />
-            <Box sx={{ height: 300, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-              <Doughnut
-                data={investmentDistributionData}
+            <Box sx={{ 
+              height: isMobile ? 200 : 300, 
+              display: 'flex', 
+              justifyContent: 'center',
+              alignItems: 'center'
+            }}>
+              <Doughnut 
+                data={investmentDistributionData} 
                 options={{
                   maintainAspectRatio: false,
                   responsive: true,
-                  cutout: '70%',
                   plugins: {
                     legend: {
                       position: 'bottom',
+                      labels: {
+                        boxWidth: isMobile ? 10 : 20,
+                        font: {
+                          size: isMobile ? 10 : 12
+                        }
+                      }
                     }
                   }
                 }}
@@ -256,46 +373,47 @@ const DashboardPage = () => {
           </Paper>
         </Grid>
         
-        {/* Recent Activities */}
+        {/* Recent Customers */}
         <Grid item xs={12}>
-          <Paper elevation={3} sx={{ p: 2 }}>
-            <Typography variant="h6" gutterBottom>Recent Customer Registrations</Typography>
+          <Paper elevation={3} sx={{ p: isMobile ? 1.5 : 2 }}>
+            <Typography variant={isMobile ? "subtitle1" : "h6"} gutterBottom>
+              Recent Customers
+            </Typography>
             <Divider sx={{ mb: 2 }} />
-            <List sx={{ width: '100%' }}>
-              {recentCustomers.length > 0 ? (
-                recentCustomers.map((customer, index) => (
-                  <Box key={customer._id || index}>
-                    <ListItem alignItems="flex-start">
-                      <ListItemAvatar>
-                        <Avatar sx={{ bgcolor: 'primary.main' }}>
-                          <PersonIcon />
-                        </Avatar>
-                      </ListItemAvatar>
-                      <ListItemText
-                        primary={`${customer.firstName} ${customer.lastName}`}
-                        secondary={
-                          <>
-                            <Typography
-                              sx={{ display: 'inline' }}
-                              component="span"
-                              variant="body2"
-                              color="text.primary"
-                            >
-                              {customer.email}
-                            </Typography>
-                            {` — Registered on ${moment(customer.createdAt).format('DD MMM YYYY')}`}
-                          </>
-                        }
-                      />
-                    </ListItem>
-                    {index < recentCustomers.length - 1 && <Divider variant="inset" component="li" />}
-                  </Box>
-                ))
-              ) : (
-                <Typography variant="body2" color="text.secondary" sx={{ p: 2 }}>
-                  No recent customer registrations found.
-                </Typography>
-              )}
+            <List disablePadding>
+              {recentCustomers.map((customer) => (
+                <ListItem 
+                  key={customer._id} 
+                  divider 
+                  sx={{ 
+                    px: isMobile ? 1 : 2, 
+                    py: isMobile ? 1 : 1.5 
+                  }}
+                >
+                  <ListItemAvatar>
+                    <Avatar sx={{ bgcolor: 'primary.light', width: isMobile ? 32 : 40, height: isMobile ? 32 : 40 }}>
+                      <PersonIcon fontSize={isMobile ? "small" : "medium"} />
+                    </Avatar>
+                  </ListItemAvatar>
+                  <ListItemText
+                    primary={
+                      <Typography variant="body1" sx={{ fontWeight: 500, fontSize: isMobile ? '0.875rem' : '1rem' }}>
+                        {customer.name}
+                      </Typography>
+                    }
+                    secondary={
+                      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: { xs: 0, sm: 2 } }}>
+                        <Typography variant="body2" color="text.secondary" sx={{ fontSize: isMobile ? '0.75rem' : '0.875rem' }}>
+                          {customer.email}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary" sx={{ fontSize: isMobile ? '0.75rem' : '0.875rem' }}>
+                          Joined: {moment(customer.joinedDate).format('MMM DD, YYYY')}
+                        </Typography>
+                      </Box>
+                    }
+                  />
+                </ListItem>
+              ))}
             </List>
           </Paper>
         </Grid>

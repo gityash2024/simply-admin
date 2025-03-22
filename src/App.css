@@ -1,8 +1,124 @@
+/* Global style overrides for Simply Invest Admin */
+
+body, html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  overflow-x: hidden;
+}
+
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* For tables and containers to ensure proper width on all screen sizes */
+.full-width-container {
+  width: 80vw!important;
+  max-width: 100% !important;
+  overflow-x: auto;
+}
+
+/* Responsive adjustments */
+@media (max-width: 960px) {
+  .MuiContainer-root {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+  
+  .MuiTableContainer-root {
+    overflow-x: auto;
+  }
+}
+
+@media (max-width: 600px) {
+  .MuiContainer-root {
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
+  
+  /* Make form controls stack nicely on mobile */
+  .MuiGrid-item {
+    padding-top: 8px !important;
+    padding-bottom: 8px !important;
+  }
+}
+
+/* Improved scrollbars for better UX */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Animation for loading transitions */
+.fade-in {
+  animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Helper classes */
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.full-height {
+  height: 100%;
+}
+
+.overflow-hidden {
+  overflow: hidden;
+}
+
+.overflow-auto {
+  overflow: auto;
+}
+
+/* Print styles for reports */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  .print-only {
+    display: block !important;
+  }
+  
+  body {
+    background-color: #fff !important;
+  }
 }
 
 .logo {

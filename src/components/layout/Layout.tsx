@@ -1,4 +1,5 @@
-import { useState, ReactNode } from 'react';
+import { useState, ReactNode, useEffect } from 'react';
+import React from 'react';
 import { 
   Box, 
   CssBaseline, 
@@ -22,7 +23,8 @@ import {
   MenuItem,
   Tooltip,
   Popover,
-  Paper
+  Paper,
+  useMediaQuery
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
@@ -35,6 +37,7 @@ import BarChartIcon from '@mui/icons-material/BarChart';
 import SettingsIcon from '@mui/icons-material/Settings';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import Logout from '@mui/icons-material/Logout';
+import SaveIcon from '@mui/icons-material/Save';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import ConfirmationModal from '../common/ConfirmationModal';
@@ -47,6 +50,11 @@ const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })<{
 }>(({ theme, open }) => ({
   flexGrow: 1,
   padding: theme.spacing(3),
+  paddingTop: theme.spacing(10),
+  [theme.breakpoints.down('sm')]: {
+    paddingTop: theme.spacing(8),
+    padding: theme.spacing(2),
+  },
   transition: theme.transitions.create('margin', {
     easing: theme.transitions.easing.sharp,
     duration: theme.transitions.duration.leavingScreen,
@@ -81,12 +89,32 @@ interface MenuItem {
   subMenus?: { text: string; path: string }[];
 }
 
+interface SidebarItemProps {
+  active: boolean;
+  children: React.ReactNode;
+  onClick: () => void;
+}
+
+const SidebarItem = styled(ListItemButton, {
+  shouldForwardProp: (prop) => prop !== 'active'
+})<SidebarItemProps>(({ theme, active }) => ({
+  backgroundColor: active ? theme.palette.action.selected : 'transparent',
+  color: active ? theme.palette.primary.main : theme.palette.text.primary,
+  boxShadow: active ? `0 4px 8px rgba(0, 0, 0, 0.2)` : 'none',
+  borderLeft: active ? `4px solid ${theme.palette.primary.main}` : 'none',
+  borderRight: active ? `4px solid ${theme.palette.primary.main}` : 'none',
+  '&:hover': {
+    backgroundColor: active ? theme.palette.action.selected : theme.palette.action.hover,
+  },
+}));
+
 const Layout = ({ children }: LayoutProps) => {
   const theme = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useAuth();
-  const [open, setOpen] = useState(true);
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const [open, setOpen] = useState(!isMobile);
   const [subMenuOpen, setSubMenuOpen] = useState<Record<string, boolean>>({});
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -129,6 +157,16 @@ const Layout = ({ children }: LayoutProps) => {
       read: true
     }
   ]);
+
+  // Close drawer on mobile when route changes
+  useEffect(() => {
+    if (isMobile) {
+      setOpen(false);
+    }
+  }, [location.pathname, isMobile]);
+  
+  // Adjust drawer width based on screen size
+  const drawerWidth = isMobile ? 280 : 260;
 
   const handleDrawerOpen = () => {
     setOpen(true);
@@ -204,7 +242,7 @@ const Layout = ({ children }: LayoutProps) => {
   };
 
   return (
-    <Box sx={{ display: 'flex' }}>
+    <Box sx={{ display: 'flex', width: '100%', height: '100%' }}>
       <CssBaseline />
       <AppBar 
         position="fixed" 
@@ -214,7 +252,7 @@ const Layout = ({ children }: LayoutProps) => {
             easing: theme.transitions.easing.sharp,
             duration: theme.transitions.duration.leavingScreen,
           }),
-          ...(open && {
+          ...(open && !isMobile && {
             marginLeft: drawerWidth,
             width: `calc(100% - ${drawerWidth}px)`,
             transition: theme.transitions.create(['width', 'margin'], {
@@ -224,95 +262,119 @@ const Layout = ({ children }: LayoutProps) => {
           }),
         }}
       >
-        <Toolbar>
-          <IconButton
-            color="inherit"
-            aria-label="open drawer"
-            onClick={handleDrawerOpen}
-            edge="start"
-            sx={{
-              marginRight: 5,
-              ...(open && { display: 'none' }),
-            }}
-          >
-            <MenuIcon />
-          </IconButton>
-          <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
-            Simply Invest Admin
-          </Typography>
-          
-          <NotificationPopover 
-            notifications={notifications}
-            onMarkAllAsRead={handleMarkAllAsRead}
-            onViewAll={handleViewAllNotifications}
-          />
-          
-          <Box sx={{ ml: 2 }}>
+        <Toolbar
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: theme.spacing(0, 1),
+            minHeight: '64px',
+            '@media (max-width: 600px)': {
+              minHeight: '56px',
+              padding: theme.spacing(0, 1),
+            },
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <IconButton
+              color="inherit"
+              aria-label="open drawer"
+              onClick={handleDrawerOpen}
+              edge="start"
+              sx={{
+                marginRight: 2,
+                ...(open && { display: 'none' }),
+              }}
+            >
+              <MenuIcon />
+            </IconButton>
+            <Typography 
+              variant="h6" 
+              noWrap 
+              component="div"
+              sx={{ 
+                display: { xs: isMobile ? 'none' : 'block', sm: 'block' },
+                fontSize: { xs: '1rem', sm: '1.25rem' }
+              }}
+            >
+              Simply Invest Admin
+            </Typography>
+          </Box>
+
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            {/* Notification icon */}
+            <NotificationPopover 
+              notifications={notifications}
+              onMarkAllAsRead={handleMarkAllAsRead}
+              onViewAll={handleViewAllNotifications}
+            />
+            
+            {/* User profile */}
             <Tooltip title="Account settings">
               <IconButton
                 onClick={handleUserMenuOpen}
                 size="small"
-                sx={{ ml: 2 }}
-                aria-controls={Boolean(anchorEl) ? 'account-menu' : undefined}
+                sx={{ ml: 1 }}
+                aria-controls={openUserMenu ? 'account-menu' : undefined}
                 aria-haspopup="true"
-                aria-expanded={Boolean(anchorEl) ? 'true' : undefined}
+                aria-expanded={openUserMenu ? 'true' : undefined}
               >
                 <Avatar sx={{ width: 32, height: 32, bgcolor: 'primary.main' }}>
                   {user?.firstName?.charAt(0) || 'U'}
                 </Avatar>
               </IconButton>
             </Tooltip>
+            <Menu
+              anchorEl={anchorEl}
+              id="account-menu"
+              open={openUserMenu}
+              onClose={handleUserMenuClose}
+              onClick={handleUserMenuClose}
+              PaperProps={{
+                elevation: 0,
+                sx: {
+                  overflow: 'visible',
+                  filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
+                  mt: 1.5,
+                  '& .MuiAvatar-root': {
+                    width: 32,
+                    height: 32,
+                    ml: -0.5,
+                    mr: 1,
+                  },
+                  '&:before': {
+                    content: '""',
+                    display: 'block',
+                    position: 'absolute',
+                    top: 0,
+                    right: 14,
+                    width: 10,
+                    height: 10,
+                    bgcolor: 'background.paper',
+                    transform: 'translateY(-50%) rotate(45deg)',
+                    zIndex: 0,
+                  },
+                },
+              }}
+              transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+              anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+            >
+            
+              <MenuItem onClick={() => navigate('/settings')}>
+                <ListItemIcon>
+                  <SettingsIcon fontSize="small" />
+                </ListItemIcon>
+                Settings
+              </MenuItem>
+              <Divider />
+              <MenuItem onClick={handleLogout}>
+                <ListItemIcon>
+                  <Logout fontSize="small" />
+                </ListItemIcon>
+                Logout
+              </MenuItem>
+            </Menu>
           </Box>
-          <Menu
-            anchorEl={anchorEl}
-            id="account-menu"
-            open={Boolean(anchorEl)}
-            onClose={handleUserMenuClose}
-            onClick={handleUserMenuClose}
-            PaperProps={{
-              elevation: 0,
-              sx: {
-                overflow: 'visible',
-                filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
-                mt: 1.5,
-                '& .MuiAvatar-root': {
-                  width: 32,
-                  height: 32,
-                  ml: -0.5,
-                  mr: 1,
-                },
-                '&:before': {
-                  content: '""',
-                  display: 'block',
-                  position: 'absolute',
-                  top: 0,
-                  right: 14,
-                  width: 10,
-                  height: 10,
-                  bgcolor: 'background.paper',
-                  transform: 'translateY(-50%) rotate(45deg)',
-                  zIndex: 0,
-                },
-              },
-            }}
-            transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-            anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-          >
-           
-            <MenuItem onClick={handleUserMenuClose}>
-              <Avatar /> Settings
-            </MenuItem>
-            <Divider />
-            <MenuItem onClick={() => {
-              handleUserMenuClose();
-              setLogoutModalOpen(true);
-            }}>
-              <ListItemIcon>
-                <Logout />
-              </ListItemIcon>
-              Logout
-            </MenuItem>
-          </Menu>
         </Toolbar>
       </AppBar>
       <Drawer
@@ -320,13 +382,18 @@ const Layout = ({ children }: LayoutProps) => {
           width: drawerWidth,
           flexShrink: 0,
           '& .MuiDrawer-paper': {
-            width: drawerWidth,
+            width: isMobile ? 280 : drawerWidth,
             boxSizing: 'border-box',
           },
+          display: { xs: 'block', sm: 'block' }
         }}
-        variant="persistent"
+        variant={isMobile ? "temporary" : "persistent"}
         anchor="left"
         open={open}
+        onClose={isMobile ? handleDrawerClose : undefined}
+        ModalProps={{
+          keepMounted: true, // Better mobile performance
+        }}
       >
         <DrawerHeader>
           <Typography variant="h6" sx={{ flexGrow: 1, ml: 1 }}>
@@ -339,32 +406,55 @@ const Layout = ({ children }: LayoutProps) => {
         <Divider />
         <List>
           {menuItems.map((item) => (
-            <Box key={item.text}>
-              <ListItem disablePadding>
-                <ListItemButton 
-                  onClick={() => item.subMenus ? toggleSubMenu(item.text) : navigate(item.path)}
-                  selected={location.pathname === item.path || 
-                    (item.subMenus && item.subMenus.some(sub => location.pathname === sub.path))}
+            <React.Fragment key={item.text}>
+              {item.subMenus ? (
+                // Item with submenus
+                <>
+                  <SidebarItem
+                    active={location.pathname.startsWith(item.path)}
+                    onClick={() => toggleSubMenu(item.text)}
+                  >
+                    <ListItemIcon>{item.icon}</ListItemIcon>
+                    <ListItemText primary={item.text} />
+                    {subMenuOpen[item.text] ? <ChevronLeftIcon /> : <ChevronRightIcon />}
+                  </SidebarItem>
+                  
+                  {subMenuOpen[item.text] && (
+                    <Box sx={{ pl: 2, pr: 1 }}>
+                      {item.subMenus.map((subItem) => (
+                        <SidebarItem
+                          key={subItem.text}
+                          active={location.pathname === subItem.path}
+                          onClick={() => navigate(subItem.path)}
+                        >
+                          <ListItemIcon sx={{ minWidth: 36 }}>
+                            <Box
+                              sx={{
+                                width: 6,
+                                height: 6,
+                                borderRadius: '50%',
+                                bgcolor: 'primary.main',
+                                ml: 1,
+                              }}
+                            />
+                          </ListItemIcon>
+                          <ListItemText primary={subItem.text} />
+                        </SidebarItem>
+                      ))}
+                    </Box>
+                  )}
+                </>
+              ) : (
+                // Regular item without submenus
+                <SidebarItem
+                  active={location.pathname === item.path}
+                  onClick={() => navigate(item.path)}
                 >
                   <ListItemIcon>{item.icon}</ListItemIcon>
                   <ListItemText primary={item.text} />
-                </ListItemButton>
-              </ListItem>
-              {item.subMenus && subMenuOpen[item.text] && (
-                <List component="div" disablePadding>
-                  {item.subMenus.map((subItem) => (
-                    <ListItemButton
-                      key={subItem.text}
-                      sx={{ pl: 4 }}
-                      onClick={() => navigate(subItem.path)}
-                      selected={location.pathname === subItem.path}
-                    >
-                      <ListItemText primary={subItem.text} />
-                    </ListItemButton>
-                  ))}
-                </List>
+                </SidebarItem>
               )}
-            </Box>
+            </React.Fragment>
           ))}
         </List>
         <Divider />
@@ -379,9 +469,18 @@ const Layout = ({ children }: LayoutProps) => {
           </ListItem>
         </List>
       </Drawer>
-      <Main open={open}>
+      <Main open={open && !isMobile}>
         <DrawerHeader />
-        <Container maxWidth="xl" sx={{ mt: 2 }}>
+        <Container 
+          maxWidth="xl" 
+          sx={{ 
+            mt: 2, 
+            px: { xs: 1, sm: 2, md: 3 },
+            width: '100%',
+            maxWidth: '100% !important',
+            overflowX: 'hidden'
+          }}
+        >
           {children}
         </Container>
       </Main>

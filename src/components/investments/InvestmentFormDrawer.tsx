@@ -93,7 +93,10 @@ const InvestmentFormDrawer: React.FC<InvestmentFormDrawerProps> = ({
       sx={{
         '& .MuiDrawer-paper': { 
           width: { xs: '100%', sm: 500 },
-          overflow: 'auto'
+          overflow: 'auto',
+          marginTop: { xs: '64px', sm: 0 },
+          height: { xs: 'calc(100% - 64px)', sm: '100%' },
+          boxSizing: 'border-box'
         },
       }}
     >
