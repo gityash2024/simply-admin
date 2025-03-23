@@ -5,22 +5,16 @@ import {
   Tabs,
   Tab,
   Typography,
-  Divider,
   TextField,
   Button,
   Grid,
   Switch,
   FormControlLabel,
-  FormGroup,
-  Card,
-  CardContent,
-  CardHeader,
   Alert
 } from '@mui/material';
 import {
   Save as SaveIcon,
   Settings as SettingsIcon,
-  Person as PersonIcon,
   Notifications as NotificationsIcon,
   Security as SecurityIcon,
   AccountCircle as AccountCircleIcon
@@ -53,13 +47,6 @@ function TabPanel(props: TabPanelProps) {
       )}
     </div>
   );
-}
-
-function a11yProps(index: number) {
-  return {
-    id: `settings-tab-${index}`,
-    'aria-controls': `settings-tabpanel-${index}`,
-  };
 }
 
 const SettingsPage = () => {
@@ -139,10 +126,9 @@ const SettingsPage = () => {
     });
   };
 
-  const handleSettingChange = (field: string, value: boolean) => {
-    // Here you would update your settings state
-    // For now we'll just show a success message
-    toast.success(`${field} setting updated`);
+  const handleSettingChange = (field: string, _value: boolean) => {
+    console.log(`Setting ${field} changed`);
+    // Implementation will be added later
   };
 
   return (

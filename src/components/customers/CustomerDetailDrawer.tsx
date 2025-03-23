@@ -20,8 +20,6 @@ import {
   Phone as PhoneIcon,
   Email as EmailIcon,
   LocationOn as LocationIcon,
-  CalendarToday as CalendarIcon,
-  VerifiedUser as VerifiedIcon,
 } from '@mui/icons-material';
 import { Customer } from '../../types';
 

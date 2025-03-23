@@ -13,8 +13,6 @@ import {
   IconButton,
   Typography,
   CircularProgress,
-  Chip,
-  Tooltip,
   Checkbox,
   LinearProgress,
   Menu,
@@ -30,8 +28,6 @@ import {
 } from '@mui/icons-material';
 import { useMediaQuery } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
-
-type Order = 'asc' | 'desc';
 
 export interface Column<T> {
   id: string;

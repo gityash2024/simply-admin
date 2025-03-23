@@ -44,7 +44,7 @@ export default function NotificationPopover({
   onViewAll
 }: NotificationPopoverProps) {
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, _setLoading] = useState(false);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   

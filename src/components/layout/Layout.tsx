@@ -17,13 +17,10 @@ import {
   ListItemText, 
   useTheme,
   styled,
-  Badge,
   Avatar,
   Menu,
   MenuItem,
   Tooltip,
-  Popover,
-  Paper,
   useMediaQuery
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
@@ -35,9 +32,7 @@ import SavingsIcon from '@mui/icons-material/Savings';
 import EmailIcon from '@mui/icons-material/Email';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import SettingsIcon from '@mui/icons-material/Settings';
-import NotificationsIcon from '@mui/icons-material/Notifications';
 import Logout from '@mui/icons-material/Logout';
-import SaveIcon from '@mui/icons-material/Save';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import ConfirmationModal from '../common/ConfirmationModal';
@@ -118,9 +113,7 @@ const Layout = ({ children }: LayoutProps) => {
   const [subMenuOpen, setSubMenuOpen] = useState<Record<string, boolean>>({});
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [notificationAnchorEl, setNotificationAnchorEl] = useState<null | HTMLElement>(null);
   const openUserMenu = Boolean(anchorEl);
-  const openNotifications = Boolean(notificationAnchorEl);
   
   // Mock notifications
   const [notifications, setNotifications] = useState<Notification[]>([
@@ -199,14 +192,6 @@ const Layout = ({ children }: LayoutProps) => {
   const handleUserMenuClose = () => {
     setAnchorEl(null);
   };
-  
-  const handleNotificationClick = (event: React.MouseEvent<HTMLElement>) => {
-    setNotificationAnchorEl(event.currentTarget);
-  };
-  
-  const handleNotificationClose = () => {
-    setNotificationAnchorEl(null);
-  };
 
   const menuItems: MenuItem[] = [
     { text: 'Dashboard', path: '/dashboard', icon: <DashboardIcon /> },
@@ -236,7 +221,6 @@ const Layout = ({ children }: LayoutProps) => {
   };
   
   const handleViewAllNotifications = () => {
-    handleNotificationClose();
     // Navigate to notifications page
     navigate('/notifications');
   };

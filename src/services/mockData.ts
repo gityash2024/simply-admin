@@ -16,6 +16,10 @@ export const generateMockCustomers = (count: number = 50): Customer[] => {
       lastName: `LastName${i + 1}`,
       dateOfBirth: moment().subtract(Math.floor(Math.random() * 40) + 18, 'years').format('YYYY-MM-DD'),
       email: `customer${i + 1}@example.com`,
+      mobile: `+91${9000000000 + i}`,
+      city: `City${i % 10}`,
+      state: i % 5 === 0 ? 'Karnataka' : i % 5 === 1 ? 'Maharashtra' : i % 5 === 2 ? 'Tamil Nadu' : i % 5 === 3 ? 'Uttar Pradesh' : 'Delhi',
+      status: i % 10 === 0 ? 'Inactive' : 'Active',
       mobileNumber: `+91${9000000000 + i}`,
       gender: i % 3 === 0 ? 'Female' : 'Male',
       taxStatus: 'Resident Individual',
@@ -38,7 +42,6 @@ export const generateMockCustomers = (count: number = 50): Customer[] => {
       },
       communicationMode: i % 5 === 0 ? 'Physical' : i % 5 === 1 ? 'Email' : i % 5 === 2 ? 'Mobile' : i % 5 === 3 ? 'WhatsApp' : 'Both Email and Physical',
       holdingNature: i % 3 === 0 ? 'Single Holding' : i % 3 === 1 ? 'Joint Holding' : 'On Behalf Of Minor',
-      status: i % 10 === 0 ? 'Inactive' : 'Active',
       createdAt: createdDate,
       updatedAt: createdDate
     });

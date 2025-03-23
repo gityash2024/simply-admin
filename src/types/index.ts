@@ -22,6 +22,7 @@ export interface AuthState {
 export interface Customer {
   _id: string;
   id?: string; // Alternative ID format
+  customerId?: string; // Added property to match mockData
   firstName: string;
   lastName: string;
   email: string;
@@ -43,6 +44,25 @@ export interface Customer {
   totalInvestment?: number;
   createdAt: string;
   updatedAt: string;
+  address?: {
+    addressLine1: string;
+    addressLine2?: string;
+    city: string;
+    state: string;
+    pincode: string;
+    country: string;
+  };
+  panNumber?: string;
+  accountDetails?: {
+    accountNumber: string;
+    ifscCode: string;
+    bankName: string;
+    branchName: string;
+    accountType: string;
+  };
+  communicationMode?: string;
+  holdingNature?: string;
+  mobileNumber?: string;
 }
 
 // Investment Types

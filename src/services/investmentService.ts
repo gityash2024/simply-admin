@@ -68,7 +68,7 @@ export const investmentService = {
           data: newInvestment
         };
       }
-      return await postData<ApiResponse<Investment>>('/investments', investmentData);
+      return await postData('/investments', investmentData);
     } catch (error) {
       throw error;
     }
@@ -84,7 +84,7 @@ export const investmentService = {
           return {
             success: false,
             message: 'Investment not found',
-            data: null as unknown as Investment
+            data: {} as Investment
           };
         }
         
@@ -102,7 +102,7 @@ export const investmentService = {
           data: updatedInvestment
         };
       }
-      return await putData<ApiResponse<Investment>>(`/investments/${id}`, investmentData);
+      return await putData(`/investments/${id}`, investmentData);
     } catch (error) {
       throw error;
     }
@@ -130,7 +130,7 @@ export const investmentService = {
           data: null
         };
       }
-      return await deleteData<ApiResponse<null>>(`/investments/${id}`);
+      return await deleteData(`/investments/${id}`);
     } catch (error) {
       throw error;
     }
